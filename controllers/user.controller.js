@@ -7,6 +7,12 @@ const User = require("../models/user");
 // Importing helper function to send email
 const sendEmail = require("../helpers/emailHelper");
 
+// Importing the jwt library
+const jwt = require("jsonwebtoken");
+
+// Importing the EMAIL_ID from the configuration file
+const { SECRET_KEY } = require("../utils/config");
+
 const userController = {
   // API for registering users
   register: async (req, res) => {
@@ -110,6 +116,91 @@ const userController = {
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API for user login
+  login: async (req, res) => {
+    try {
+      // getting the user email and password from the request body
+      const { email, password } = req.body;
+
+      // checking if the user exists in the database
+      const user = await User.findOne({ email });
+
+      // if the user does not exist, return an error response
+      if (!user) {
+        return res.status(404).send({ message: "User not found" });
+      }
+
+      // if the user exists check the password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      // if the password is invalid, return an error response
+      if (!isPasswordValid) {
+        return res.status(400).send({ message: "Invalid password" });
+      }
+
+      // generating a JWT token
+      const token = jwt.sign({ id: user._id }, SECRET_KEY);
+
+      // setting the token as a cookie
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        expires: new Date(Date.now() + 24 * 3600000), // 24 hours from login
+        path: "/",
+      });
+
+      // Setting user role as cookie
+      res.cookie("role", user.role, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        expires: new Date(Date.now() + 24 * 3600000), // 24 hours from login
+        path: "/",
+      });
+
+      // sending a success response
+      res.status(200).json({
+        message: "Login successful",
+        user,
+      });
+    } catch (error) {
+      // sending an error response
+      res.status(500).send({ message: error.message });
+    }
+  },
+
+  // API for user logout
+  logout: async (req, res) => {
+    try {
+      const userId = req.userId;
+
+      if (!userId) {
+        return res.status(400).send({ message: "User not authenticated" });
+      }
+
+      // clearing the cookie
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+      });
+      res.clearCookie("role", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+      });
+
+      // sending a success response
+      res.status(200).send({ message: "Logged out successfully" });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).send({ message: error.message });
     }
   },
 };
