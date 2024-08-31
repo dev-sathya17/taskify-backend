@@ -17,5 +17,14 @@ userRouter.post("/login", userController.login);
 // Route to logout a user
 userRouter.get("/logout", auth.authenticate, userController.logout);
 
+// Route for forgot password
+userRouter.post("/forgot-password", userController.forgotPassword);
+
+// Route to verify OTP
+userRouter.post("/verify", userController.verifyOtp);
+
+// Route to reset password
+userRouter.put("/reset", userController.resetPassword);
+
 // Exporting the router
 module.exports = userRouter;

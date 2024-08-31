@@ -12,6 +12,7 @@ const jwt = require("jsonwebtoken");
 
 // Importing the EMAIL_ID from the configuration file
 const { SECRET_KEY } = require("../utils/config");
+const generateOtp = require("../helpers/userHelper");
 
 const userController = {
   // API for registering users
@@ -201,6 +202,152 @@ const userController = {
     } catch (error) {
       // Sending an error response
       res.status(500).send({ message: error.message });
+    }
+  },
+
+  // API for sending email for the user when user wants to reset password
+  forgotPassword: async (req, res) => {
+    try {
+      // Extracting values from request body
+      const { email } = req.body;
+
+      // Checking if this email is of a valid user
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res
+          .status(404)
+          .json({ message: "User with this email does not exist" });
+      }
+
+      // Generating otp
+      const otp = generateOtp();
+
+      // Update user
+      user.otp = otp;
+      await user.save();
+
+      const subject = "Password Reset Request";
+      const message = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Reset Your Taskify Password</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background-color: #f9f9f9;
+                            margin: 0;
+                            padding: 20px;
+                        }
+                        .container {
+                            max-width: 600px;
+                            background-color: #ffffff;
+                            padding: 30px;
+                            border-radius: 10px;
+                            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                            margin: auto;
+                        }
+                        h1 {
+                            color: #333333;
+                            font-size: 24px;
+                        }
+                        p {
+                            font-size: 16px;
+                            line-height: 1.6;
+                            color: #555555;
+                        }
+                        .otp {
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: #28a745;
+                            letter-spacing: 2px;
+                            margin: 20px 0;
+                            padding: 10px 20px;
+                            border: 1px dashed #28a745;
+                            display: inline-block;
+                            background-color: #f0f9f4;
+                            border-radius: 5px;
+                        }
+                        
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>Password Reset Request</h1>
+                        <p>Hi ${user.name},</p>
+                        <p>You recently requested to reset your password for your Taskify account. Use the following OTP (One Time Password) to reset your password:</p>
+                        <div class="otp">${otp}</div>
+                        <p>This OTP is valid for the next 10 minutes. If you did not request a password reset, please ignore this email or contact support if you have any concerns.</p>
+                        <p>Thank you,<br>The Taskify Team</p>
+                    </div>
+                </body>
+                </html>
+                `;
+
+      // Sending an email
+      sendEmail(email, subject, message);
+
+      // Sending a success response
+      res.status(200).json({
+        message: "OTP successfully sent to your email address.",
+      });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to verify OTP
+  verifyOtp: async (req, res) => {
+    try {
+      const { otp, email } = req.body;
+
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        return res.status(404).send({ message: "user not found" });
+      }
+
+      if (user.otp === otp) {
+        user.otp = 0;
+        await user.save();
+        res.status(200).send({ message: "OTP verified successfully" });
+      } else {
+        return res.status(400).send({ message: "Invalid OTP" });
+      }
+    } catch (error) {
+      return res.status(500).send({ message: error.message });
+    }
+  },
+
+  // API for resetting password
+  resetPassword: async (req, res) => {
+    try {
+      // Extracting values from request body
+      const { email, password } = req.body;
+
+      // Checking if this email is of a valid user
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res
+          .status(404)
+          .json({ message: "User with this email does not exist" });
+      }
+
+      // Encrypting the password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Update user
+      user.password = hashedPassword;
+      await user.save();
+
+      // Sending a success response
+      res.status(200).json({ message: "Password reset successfully" });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
     }
   },
 };
