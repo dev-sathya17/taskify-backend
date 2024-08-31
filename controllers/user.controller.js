@@ -350,6 +350,84 @@ const userController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // API to get user profile information
+  getProfile: async (req, res) => {
+    try {
+      // Getting user id from request parameters
+      const id = req.userId;
+
+      // Fetching the user from the database
+      const user = await User.findById(id, "-password -otp -__v");
+
+      // If user not found, return error response
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // If user found, return the user data
+      res.json(user);
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to update user profile information
+  updateProfile: async (req, res) => {
+    try {
+      // Getting user id from request parameters
+      const { id } = req.params;
+      const { name, email, mobile } = req.body;
+
+      const user = await User.findById(id);
+
+      // If user not found, return error response
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Updating user profile information
+      user.name = name || user.name;
+      user.email = email || user.email;
+      user.mobile = mobile || user.mobile;
+
+      // Saving info to the database
+      const updatedUser = await user.save();
+
+      // If user found, return the updated user data
+      res.json({ message: "User profile updated successfully", updatedUser });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to delete user
+  deleteProfile: async (req, res) => {
+    try {
+      // Getting user id from request parameters
+      const { id } = req.params;
+
+      // Finding and deleting the user from the database using the id in the request parameters.
+      const user = await User.findByIdAndDelete(id);
+
+      // If user not found, return error response
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Removing the user cookie
+      res.clearCookie("token");
+      res.clearCookie("role");
+
+      // returning success response, if user is deleted
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 module.exports = userController;

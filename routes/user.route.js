@@ -26,5 +26,18 @@ userRouter.post("/verify", userController.verifyOtp);
 // Route to reset password
 userRouter.put("/reset", userController.resetPassword);
 
+// Route for getting user profile
+userRouter.get("/profile", auth.authenticate, userController.getProfile);
+
+// Route for updating user profile
+userRouter.put("/update/:id", auth.authenticate, userController.updateProfile);
+
+// Route for deleting user
+userRouter.delete(
+  "/delete/:id",
+  auth.authenticate,
+  userController.deleteProfile
+);
+
 // Exporting the router
 module.exports = userRouter;
