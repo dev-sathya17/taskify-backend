@@ -32,6 +32,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  todos: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Todo",
+    },
+  ],
 });
 
 // Exporting the User model for use in other parts of the application
