@@ -391,6 +391,7 @@ const userController = {
       user.name = name || user.name;
       user.email = email || user.email;
       user.mobile = mobile || user.mobile;
+      user.image = req.file ? req.file.path : user.image;
 
       // Saving info to the database
       const updatedUser = await user.save();
