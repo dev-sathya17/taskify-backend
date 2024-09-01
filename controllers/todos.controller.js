@@ -4,6 +4,8 @@ const User = require("../models/user");
 // Importing the Todo model
 const Todo = require("../models/todo");
 
+const mongoose = require("mongoose");
+
 const todosController = {
   // API to create Todos
   createTodo: async (req, res) => {
@@ -102,7 +104,6 @@ const todosController = {
     }
   },
 
-  // Mark: Today's
   // API to get todos count by status
   getTodosCountByStatus: async (req, res) => {
     try {
@@ -171,7 +172,13 @@ const todosController = {
   // API to get todos count by priority
   getTodosCountByPriority: async (req, res) => {
     try {
+      const userId = new mongoose.Types.ObjectId(req.userId);
       const countsByPriority = await Todo.aggregate([
+        {
+          $match: {
+            userId,
+          },
+        },
         {
           $group: {
             _id: "$priority",
@@ -209,6 +216,7 @@ const todosController = {
 
       // Count todos that are due today
       const count = await Todo.countDocuments({
+        userId: req.userId,
         deadline: {
           $gte: today,
           $lt: tomorrow,

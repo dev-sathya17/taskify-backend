@@ -13,6 +13,7 @@ const app = express();
 // Importing the routes for users and todos
 const userRouter = require("./routes/user.route");
 const todosRouter = require("./routes/todos.route");
+const adminRouter = require("./routes/admin.route");
 
 // parse the cookies of the request
 app.use(cookieParser());
@@ -26,6 +27,7 @@ app.use(morgan("dev"));
 // Creating routes
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/todos", todosRouter);
+app.use("/api/v1/admin", adminRouter);
 
 // Export the express app
 module.exports = app;

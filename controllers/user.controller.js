@@ -110,8 +110,7 @@ const userController = {
 
       // Sending a success response
       res.status(201).json({
-        message:
-          "Your account has been created successfully. Check your email to activate your account.",
+        message: "Your account has been created successfully.",
         user,
       });
     } catch (error) {
