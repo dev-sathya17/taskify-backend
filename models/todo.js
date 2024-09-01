@@ -39,6 +39,10 @@ const todoSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  isNotified: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const Todo = mongoose.model("Todo", todoSchema, "todos");

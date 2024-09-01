@@ -24,6 +24,9 @@ app.use(express.json());
 // to log requests
 app.use(morgan("dev"));
 
+// Adding the notification job
+require("./jobs/NotificationJob");
+
 // Creating routes
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/todos", todosRouter);
