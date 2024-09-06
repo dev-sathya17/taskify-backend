@@ -19,7 +19,7 @@ const adminRouter = require("./routes/admin.route");
 
 app.use(
   cors({
-    origin: "https://main--taskifysmart.netlify.app/",
+    origin: "https://main--taskifysmart.netlify.app",
     credentials: true,
   })
 );
