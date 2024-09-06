@@ -19,7 +19,7 @@ const adminRouter = require("./routes/admin.route");
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://main--taskifysmart.netlify.app/",
     credentials: true,
   })
 );
