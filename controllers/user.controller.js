@@ -306,7 +306,9 @@ const userController = {
       const user = await User.findOne({ email });
 
       if (!user) {
-        return res.status(404).send({ message: "user not found" });
+        return res
+          .status(404)
+          .send({ message: "user not found with this email id" });
       }
 
       if (user.otp === otp) {
@@ -417,12 +419,41 @@ const userController = {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Removing the user cookie
-      res.clearCookie("token");
-      res.clearCookie("role");
+      const currentUser = User.findById(req.userId);
+
+      if (currentUser.role !== "admin") {
+        // Removing the user cookie
+        res.clearCookie("token");
+        res.clearCookie("role");
+      }
 
       // returning success response, if user is deleted
       res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      // Sending an error response
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // API to check authentication
+  checkAuthentication: async (req, res) => {
+    try {
+      const token = req.cookies.token;
+      const role = req.cookies.role;
+
+      // If token does not exist
+      if (!token) {
+        return res.status(401).json({ message: "Access Denied" });
+      }
+
+      // Verifying the token using JWT
+      try {
+        const verified = jwt.verify(token, SECRET_KEY);
+        res.status(200).json({ message: "Authentication successful", role });
+      } catch (error) {
+        // Sending an error response
+        return res.status(401).json({ message: "Invalid token" });
+      }
     } catch (error) {
       // Sending an error response
       res.status(500).json({ message: error.message });

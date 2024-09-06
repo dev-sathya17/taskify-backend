@@ -164,6 +164,16 @@ const adminController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  // API to get all todos
+  getAllTodos: async (req, res) => {
+    try {
+      const todos = await Todo.find().populate("userId");
+      res.json(todos);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 module.exports = adminController;

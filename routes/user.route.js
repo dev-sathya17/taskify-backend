@@ -19,6 +19,9 @@ userRouter.post("/register", userController.register);
 // Route to login a user
 userRouter.post("/login", userController.login);
 
+// Route to check authentication
+userRouter.get("/check-auth", userController.checkAuthentication);
+
 // Route to logout a user
 userRouter.get("/logout", auth.authenticate, userController.logout);
 

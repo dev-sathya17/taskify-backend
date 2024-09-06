@@ -19,6 +19,13 @@ adminRouter.get(
   adminController.getAllUsers
 );
 
+adminRouter.get(
+  "/todos",
+  auth.authenticate,
+  auth.authorize,
+  adminController.getAllTodos
+);
+
 // Route to get todo's count chart
 adminRouter.get(
   "/count/status",
