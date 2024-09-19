@@ -421,7 +421,7 @@ const userController = {
       }
 
       user.todos.map((todo) => {
-        const todo = Todo.findByIdAndDelete(todo._id);
+        const t = Todo.findByIdAndDelete(todo._id);
       });
 
       const currentUser = User.findById(req.userId);
