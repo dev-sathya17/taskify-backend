@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 
 // Importing the User model
 const User = require("../models/user");
+const Todo = require("../models/todo");
 
 // Importing helper function to send email
 const sendEmail = require("../helpers/emailHelper");
@@ -418,6 +419,10 @@ const userController = {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
+
+      user.todos.map((todo) => {
+        const todo = Todo.findByIdAndDelete(todo._id);
+      });
 
       const currentUser = User.findById(req.userId);
 
