@@ -1,7 +1,7 @@
 // Importing bcrypt library for encrypting passwords
 const bcrypt = require("bcrypt");
 
-// Importing the User model
+// Importing the User and todo model
 const User = require("../models/user");
 const Todo = require("../models/todo");
 
@@ -420,8 +420,8 @@ const userController = {
         return res.status(404).json({ message: "User not found" });
       }
 
-      user.todos.map((todo) => {
-        const t = Todo.findByIdAndDelete(todo._id);
+      user.todos.map(async (todo) => {
+        await Todo.findByIdAndDelete(todo._id);
       });
 
       const currentUser = User.findById(req.userId);
